@@ -1,17 +1,54 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import React, { Component } from 'react';
+import ReactDOM  from 'react-dom';
+
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+class App extends Component {
+  state = {
+    isLoading: true,
+    users: [],
+    error: null
+  };
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+  fetchUsers() {
+    fetch(`https://jsonplaceholder.typicode.com/users`)
+      .then(response => response.json())
+      .then(data =>
+        this.setState({
+          users: data,
+          isLoading: false,
+        })
+      )
+      .catch(error => this.setState({ error, isLoading: false }));
+  }
+
+  componentDidMount() {
+    this.fetchUsers();
+  }
+  render() {
+    const { isLoading, users, error } = this.state;
+    return (
+      <React.Fragment>
+        <h1>Random User</h1>
+        {error ? <p>{error.message}</p> : null}
+        {!isLoading ? (
+          users.map(user => {
+            const { username, name, email } = user;
+            return (
+              <div key={username}>
+                <p>Name: {name}</p>
+                <p>Email Address: {email}</p>
+                <hr />
+              </div>
+            );
+          })
+        ) : (
+          <h3>Loading...</h3>
+        )}
+      </React.Fragment>
+    );
+  }
+}
+
+
+ReactDOM.render(<App />, document.getElementById("root"));
